@@ -494,7 +494,6 @@ form .row .col-2 {
   box-shadow: none;
   color: white;
   -webkit-box-shadow: none;
-  -webkit-user-select: none;
   transition: none;
 }
 
