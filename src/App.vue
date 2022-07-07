@@ -1,13 +1,34 @@
 <template>
-  <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </div>
-    <router-view/>
-  </div>
+<div>
+    <NavigationBar />
+<notifications position="bottom right"/>
+  <router-view></router-view>
+</div>
 </template>
-
+<script>
+import NavigationBar from "./components/NavigationBar.vue";
+import { mapState } from "vuex";
+import { AUTO_LOGIN_ACTION } from "../src/store/StoreConstants";
+export default {
+    created() {
+    this.$store.dispatch(`auth/${AUTO_LOGIN_ACTION}`);
+  },
+  computed: {
+    ...mapState({
+      showLoading: (state) => state.showLoading
+    })
+  },
+  components:{
+    NavigationBar
+  },
+  mounted(){
+    // window.Echo.channel('new-block')
+    // .listen('NewBlock', (e) => {
+    //   console.log(e);
+    // });
+  }
+}
+</script>
 <style>
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;

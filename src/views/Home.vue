@@ -1,7 +1,8 @@
 <template>
   <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <center>
+          <HelloWorld msg="Welcome to Land Aquisition Blockchain"/>
+    </center>
   </div>
 </template>
 
@@ -16,3 +17,12 @@ export default {
   }
 }
 </script>
+<style scoped>
+.home{
+  background: url('../../public/hero_1.jpg') center fixed no-repeat;
+  height: 100vh;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+</style>
