@@ -24,6 +24,7 @@ export default {
             state.user_id,
             state.name,
             state.token,
+            state.role
         ]
     },
 
@@ -32,5 +33,9 @@ export default {
     },
     [USER_ROLE_GETTER](state) {
         return state.role
+    },
+    getRole(state) {
+        return state.role
     }
+
 };

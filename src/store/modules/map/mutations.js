@@ -1,6 +1,6 @@
 export default {
     setFeature(state, payload) {
-        console.log("in mutation")
+        console.log(payload.feature)
         state.feature = payload.feature
             // state.feature.id = payload.feature.id
             // state.feature.type = "Feature"

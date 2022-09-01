@@ -10,6 +10,7 @@ import CertificateIssue from '../views/CertificateIssue.vue';
 import Wallet from '../views/Wallet.vue';
 import FeatureView from '../views/FeatureView.vue';
 import Draw from '../views/Draw.vue';
+import Map from '../views/Map.vue';
 import mapComponent from '../components/Map.vue';
 
 Vue.use(VueRouter)
@@ -68,6 +69,11 @@ const routes = [{
         path: '/draw/:aspect/:id',
         name: 'Draw',
         component: Draw
+    },
+    {
+        path: '/map',
+        name: 'Map',
+        component: Map
     },
     {
         path: '/about',

@@ -96,8 +96,8 @@ export default {
   created() {
   },
   async mounted() {
-    await this.getUserLand();
-    this.feature = this.$store.getters["transaction/getFeatures"];
+    await this.getLands();
+    this.feature = this.$store.getters["map/getFeature"];console.log(this.feature,'sdddsd')
     this.userTransInfo = this.$store.getters["transaction/getPerTransInfo"];
     mapboxgl.accessToken = this.accessToken;
 
@@ -218,6 +218,9 @@ export default {
       getFeature: "getFeatures",
       getUserLand: "getUserLand",
     }),
+    ...mapActions("map", {
+      getLands: "getAllLand",
+    }),
     updateArea() {
       const data = this.draw.getAll();
       console.log(data);
@@ -237,7 +240,7 @@ export default {
         container: this.fullPage ? null : this.$refs.formContainer,
         canCancel: false,
       });
-      if (this.userTransInfo.transactionType == "wholeLand") {
+      if (this.userTransInfo.transactionType == "Land Sale") {
         console.log(this.feature[0].geometry.coordinates[0]);
         await this.issueCertificate({
           reciever: this.userTransInfo.reciever,

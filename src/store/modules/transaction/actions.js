@@ -70,18 +70,46 @@ export default {
             sender_feature_type: payload.sender_feature_type,
             sender_feature_coordinate_length: payload.sender_feature_coordinate_length
         };
+        await axiosInstance
+            .post("transaction/partition-title", postData)
+            .then((response) => {
+                if (response.status === 201) {
+                    console.log(response.data.data);
+                }
+                console.log(response);
+            })
+            .catch((error) => {
+                console.log(error.response);
+                throw error;
+            });
         console.log(postData);
-        // await axiosInstance
-        //     .post("transaction/partition-title", postData)
-        //     .then((response) => {
-        //         if (response.status === 201) {
-        //             console.log(response.data.data);
-        //         }
-        //         console.log(response);
-        //     })
-        //     .catch((error) => {
-        //         console.log(error.response);
-        //         throw error;
-        //     });
+
     },
+    async submitTrasaction(context, payload) {
+        var EC = require("elliptic").ec;
+        var ec = new EC("secp256k1");
+        var keypair = ec.genKeyPair();
+        var signature = keypair.sign(payload.message).toDER();
+        let postData = {
+            reciever: payload.reciever,
+            sender: payload.sender,
+            type: payload.type,
+            signature: signature.toString("hex"),
+            partitionId: payload.partitionId,
+            serial_no: payload.serial_no
+        };
+        console.log(postData);
+        await axiosInstance
+            .post("transaction/whole-transfer", postData)
+            .then((response) => {
+                if (response.status === 201) {
+                    console.log(response.data.data);
+                }
+                console.log(response);
+            })
+            .catch((error) => {
+                console.log(error.response);
+                throw error;
+            });
+    }
 }

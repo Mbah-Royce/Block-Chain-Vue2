@@ -19,5 +19,15 @@ export default {
                 console.log(error.response)
                 throw error
             })
-    }
+    },
+    async getAllLand(context) {
+        await axiosInstance.get("government/all-land")
+            .then((response) => {
+                console.log(response)
+                context.commit('setFeature', { feature: response.data.data });
+            }).catch((error) => {
+                console.log(error.response)
+                throw error
+            })
+    },
 }

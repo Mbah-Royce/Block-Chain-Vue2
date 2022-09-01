@@ -1,6 +1,6 @@
 <template>
   <div class="con">
-    <div class="card" style="margin-bottom: 100px">
+    <div class="card"  :class="{ active: true }">
       <div class="card-title mx-auto">Transaction</div>
       <form @submit.prevent="handleSubmit()">
         <span id="card-header">Public Keys:</span>
@@ -59,7 +59,7 @@
               >Partition From Title</label
             >
           </div>
-          <div class="form-check form-check-inline">
+          <!-- <div class="form-check form-check-inline">
             <input
               class="form-check-input"
               type="radio"
@@ -71,24 +71,24 @@
             <label class="form-check-label" for="inlineRadio2"
               >Partition From Portion</label
             >
-          </div>
-            <div class="form-check form-check-inline">
+          </div> -->
+          <div class="form-check form-check-inline">
             <input
               class="form-check-input"
               type="radio"
               name="inlineRadioOptions"
               id="inlineRadio2"
-              value="Whole-portion"
+              value="whole-partition"
               v-model="type"
             />
             <label class="form-check-label" for="inlineRadio2"
-              >Whole Portion  </label
-            >
+              >Whole Portion
+            </label>
           </div>
         </div>
         <div v-if="type === 'portion-title'">
-          {{subBtnTxt = "swer"}}
-            <div class="form-group py-1">
+          {{ (subBtnTxt = "swer") }}
+          <div class="form-group py-1">
             <label for="exampleFormControlSelect1" id="card-header"
               >Select Title</label
             >
@@ -98,18 +98,19 @@
               v-model="selectedCertificate"
             >
               <option
-                v-for="(certificate, index) in certificates"
+                v-for="(certificate, index) in validCertificates"
                 v-bind:key="index"
                 v-bind:value="certificate.serial_no"
                 :selected="index == 0"
               >
                 {{ certificate.owner_name }} {{ certificate.serial_no }}
+                {{ certificate.partitioned }}
               </option>
             </select>
           </div>
         </div>
         <div v-else-if="type === 'whole-land'">
-          {{subBtnTxt = "Transfer"}}
+          {{ (subBtnTxt = "Transfer") }}
           <div class="form-group py-1">
             <label for="exampleFormControlSelect1" id="card-header"
               >Select Title</label
@@ -125,13 +126,13 @@
                 v-bind:value="certificate.serial_no"
                 :selected="index == 0"
               >
-                {{ certificate.owner_name }} {{ certificate.serial_no }}
+                {{ certificate.owner_name }} {{ certificate.serial_no }} 
               </option>
             </select>
           </div>
         </div>
         <div v-else-if="type === 'portion-portion'">
-          {{subBtnTxt = "Transfer"}}
+          {{ (subBtnTxt = "Transfer") }}
           <div class="form-group py-1">
             <label for="exampleFormControlSelect1" id="card-header"
               >Select Title</label
@@ -152,8 +153,8 @@
             </select>
           </div>
         </div>
-                <div v-else-if="type === 'Whole-portion'">
-          {{subBtnTxt = "Transfer"}}
+        <div v-else-if="type === 'whole-partition'">
+          {{ (subBtnTxt = "Transfer") }}
           <div class="form-group py-1">
             <label for="exampleFormControlSelect1" id="card-header"
               >Select Title</label
@@ -161,7 +162,7 @@
             <select
               class="form-control"
               id="exampleFormControlSelect1"
-              v-model="selectedPortion"
+              v-model="selectedCertificate"
             >
               <option
                 v-for="(portion, index) in portions"
@@ -186,7 +187,7 @@
         </button>
       </form>
     </div>
-    <div style="margin-top: 500px; background-color: red"></div>
+    <Map :key="componentKey" @onChange="reloadMap" v-if="(type == 'whole-land' || type == 'whole-partition')" :transactionType="type" :id="id"/>
   </div>
 </template>
 
@@ -198,36 +199,61 @@ import {
   GET_USER_DATA,
   GET_USER_TOKEN_GETTER,
 } from "../store/StoreConstants";
+import Map from '../components/Map.vue'
 export default {
+  components:{
+    Map
+  },
   created() {
     this.getPartitions();
     this.getCertificates();
+    this.getValidCertificates();
   },
   mounted() {
     this.user = this.$store.getters[`auth/${GET_USER_DATA}`];
     this.token = this.$store.getters[`auth/${GET_USER_TOKEN_GETTER}`];
+    // this.$store.commit["map/setFeature",null];
   },
   data() {
     return {
-      subBtnTxt:"Draw",
+      subBtnTxt: "Draw",
       user: [],
+      id:null,
       token: null,
-      type: "whole-land",
+      componentKey:0,
+      type: null,
       reciever: null,
       selectedPortion: null,
       selectedCertificate: null,
       area: null,
       certificates: [],
+      validCertificates: [],
       portions: [],
       loader: null,
     };
   },
+    watch:{
+    selectedCertificate(newVal){
+      this.id = newVal;
+      // this.componentKey=!this.componentKey
+    },
+    selectedPortion(newVal){
+      this.id = newVal
+      // this.componentKey=!this.componentKey
+
+    }
+  },
   methods: {
+    reloadMap(){
+    this.componentKey=!this.componentKey
+    // console.log(event.target.value)
+
+    },
     ...mapActions("auth", {
       transaction: TRANSATION_SUBMIT,
     }),
-    ...mapActions("transaction",{
-      transaction: "submitTrasaction"
+    ...mapActions("transaction", {
+      transaction: "submitTrasaction",
     }),
     ...mapMutations("transaction", {
       setTransPersonnelInfo: "setPersonnleTransactionInfo",
@@ -239,23 +265,30 @@ export default {
           sender: this.user[0],
           type: this.type,
           serial_no: this.selectedCertificate,
-          area: this.area,
-          partitionId: this.selectedPortion,
+          message: this.reciever+" recieved"+ "portion of id "+this.selectedPortion+" from "+this.sender
         });
-      } else if(this.type == 'portion-title'){
+      } else if (this.type == "portion-title") {
         this.setTransPersonnelInfo({
           reciever: this.reciever,
           sender: this.user[0],
           transactionType: "portion-title",
         });
-        this.$router.push('/draw/whole-land/'+this.selectedCertificate)
-      }else if(this.type == 'portion-portion'){
-          this.setTransPersonnelInfo({
+        this.$router.push("/draw/whole-land/" + this.selectedCertificate);
+      } else if (this.type == "portion-portion") {
+        this.setTransPersonnelInfo({
           reciever: this.reciever,
           sender: this.user[0],
           transactionType: "portion-portion",
         });
-        this.$router.push('/draw/portion/'+this.selectedPortion)
+        this.$router.push("/draw/portion/" + this.selectedCertificate);
+      } else if (this.type == "whole-partition") {
+        await this.transaction({
+          reciever: this.reciever,
+          sender: this.user[0],
+          type: this.type,
+          partitionId: this.selectedPortion,
+          message: this.reciever+" recieved"+ "portion of id "+this.selectedCertificate+" from "+this.sender
+        });
       }
     },
     textToBin(text) {
@@ -291,6 +324,18 @@ export default {
           console.log(error);
         });
     },
+    async getValidCertificates() {
+      await axiosInstance
+        .get("user/valid/land")
+        .then((response) => {
+          // console.log(response.data.data);
+          this.validCertificates = response.data.data;
+          console.log(response, "dsdsdd");
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    },
   },
 };
 </script>
@@ -301,17 +346,25 @@ body {
   vertical-align: middle;
   display: flex;
 }
+.active{
+  margin: auto;
+}
 .con {
   padding-top: 25px;
+  display: flex;
+  flex-direction: row;
   margin-top: 0px;
-  background: url("../../public/rm222batch5-kul-21.jpg") center;
-  background-size: cover;
+  /* background: url("../../public/rm222batch5-kul-21.jpg") center; */
+  /* background-size: cover; */
   height: 100vh;
   background-attachment: fixed;
 }
 .card {
-  margin: auto;
-  width: 600px;
+  background: url("../../public/rm222batch5-kul-21.jpg") center;
+  background-size: cover;
+  height: 100vh;
+  /* margin: auto; */
+  width: 48%;
   padding: 3rem 3.5rem;
   box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }

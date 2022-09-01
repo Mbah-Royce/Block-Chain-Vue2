@@ -77,7 +77,7 @@ export default {
       this.setTransPersonnelInfo({
         reciever: this.reciever,
         sender: this.user[0],
-        transactionType:'wholeLand'
+        transactionType:'Land Sale'
       });
       // await this.getFeature();
       this.$router.push("/map");

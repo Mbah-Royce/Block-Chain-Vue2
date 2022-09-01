@@ -17,24 +17,35 @@ import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import "@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css";
 import "mapbox-gl/dist/mapbox-gl.css";
 import "mapbox-gl/dist/mapbox-gl.css";
-// import { mapActions, mapGetters } from "vuex";
-import axiosInstance from '../Services/AxiosInterceptor'
+// import { mapGetters } from "vuex";
+import axiosInstance from "../Services/AxiosInterceptor";
+// import USER_ROLE_GETTER from '../store/StoreConstants'
 export default {
   name: "BaseMap",
   data() {
     return {
-      land:"",
-      partition:"",
-
+      land: "",
+      partition: "",
       accessToken:
         "pk.eyJ1IjoidG9sb3MiLCJhIjoiY2wyazc1NWF0MTN1bjNpcDlweWltd3llYSJ9.bVFjRx__5fhAvYndMv51gw",
     };
   },
-  created() {
-  },
+  created() {},
   async mounted() {
-    await this.getUserLand();
-    await this.getPartitions();
+    this.role = this.$store.getters["auth/getRole"];
+    alert(this.role);
+    if (this.role == "client") {
+      alert("user");
+      await this.getUserLand();
+      await this.getPartitions();
+    } else if (this.role == "government") {
+      alert("government");
+      await this.getAllLand();
+      await this.getAllPartitions();
+    } else {
+      alert("Cannot identify role");
+    }
+
     mapboxgl.accessToken = this.accessToken;
 
     const map = new mapboxgl.Map({
@@ -55,29 +66,29 @@ export default {
       },
       // Set mapbox-gl-draw to draw by default.
       // The user does not have to click the polygon control button first.
-    //   defaultMode: "draw_polygon",
+      //   defaultMode: "draw_polygon",
     });
     map.addControl(draw, "top-left");
 
     var vueInstance = this;
-    if(vueInstance.land){
-          vueInstance.land.forEach(element => {
-          draw.add(element);
-        });
+    if (vueInstance.land) {
+      vueInstance.land.forEach((element) => {
+        draw.add(element);
+      });
     }
-        if(vueInstance.partition){
-          vueInstance.partition.forEach(element => {
-          draw.add(element);
-        });
+    if (vueInstance.partition) {
+      vueInstance.partition.forEach((element) => {
+        draw.add(element);
+      });
     }
     map.on("draw.selectionchange", function (e) {
-    //   vueInstance.show();
-      console.log(e)
+      //   vueInstance.show();
+      console.log(e);
     });
   },
   methods: {
     async getUserLand() {
-    await axiosInstance
+      await axiosInstance
         .get("user/lands")
         .then((response) => {
           // console.log(response.data.data);
@@ -89,7 +100,7 @@ export default {
         });
     },
     async getPartitions() {
-    await axiosInstance
+      await axiosInstance
         .get("user/partitions")
         .then((response) => {
           // console.log(response.data.data);
@@ -99,6 +110,20 @@ export default {
         .catch((error) => {
           console.log(error);
         });
+    },
+    async getAllLand() {
+      await axiosInstance.get("government/all-land").then((response) => {
+        // console.log(response.data.data);
+        this.land = response.data.data;
+        console.log(this.land);
+      });
+    },
+    async getAllPartitions() {
+      await axiosInstance.get("government/all-partitions").then((response) => {
+        // console.log(response.data.data);
+        this.partition = response.data.data;
+        console.log(this.land);
+      });
     },
   },
 };
